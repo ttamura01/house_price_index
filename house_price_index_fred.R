@@ -1,3 +1,5 @@
+#all-transaction house index from FRED
+
 library(tidyverse)
 library(ggtext)
 library(patchwork)
@@ -10,7 +12,7 @@ getwd()
 #Set my FRED API key
 fredr_set_key("0c5fd2514c7d98427fe3c931e2fcb244")
 san_jose <- fredr(series_id = "ATNHPIUS41940Q") %>% 
-  select(date, SanJose = value) %>% tail()
+  select(date, SanJose = value) 
 
 seattle <- fredr(series_id = "ATNHPIUS42644Q") %>% 
   select(date, Seattle = value)
