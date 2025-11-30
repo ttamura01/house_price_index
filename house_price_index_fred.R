@@ -3,31 +3,59 @@ library(ggtext)
 library(patchwork)
 library(glue)
 library(ggtext)
-library(plotly)
-setwd("/Users/takayukitamura/Documents/R_Computing/all_house_price_index")
+library(fredr) 
 
-# upload house_px file
-house_index <- read_csv("all_house_price_index .csv") %>% 
-  select(-...1)
+getwd()
 
-# georgia <- read_csv("/Users/takayukitamura/Desktop/GASTHPI.csv") %>% 
-#   select(date = observation_date, Gorgia = GASTHPI)
+#Set my FRED API key
+fredr_set_key("0c5fd2514c7d98427fe3c931e2fcb244")
+san_jose <- fredr(series_id = "ATNHPIUS41940Q") %>% 
+  select(date, SanJose = value) %>% tail()
 
-# house_index <- house_index %>% 
-#   left_join(georgia, by = "date")
+seattle <- fredr(series_id = "ATNHPIUS42644Q") %>% 
+  select(date, Seattle = value)
 
-tail(house_index)
+san_francisco <- fredr(series_id = "ATNHPIUS41884Q") %>% 
+  select(date, SanFrancisco = value)
 
-sapply(house_index, class)
+austin <- fredr(series_id = "ATNHPIUS12420Q") %>% 
+  select(date, Austin = value)
 
-updates <- tribble(~date, ~KansasCity, ~Seattle, ~SanJose, ~SanFrancisco, ~Austin, ~Dallas, ~Pittsburgh, ~Boston, ~NY.NJ, ~Philadelphia, ~Columbus,
-                   "2025-07-01", 368.64, 555.74, 559.59, 516.54, 509.73, 426.22, 326.41, 491.64, 436.88, 408.74, 342.49)
-# 
-house_index <- rbind(house_index, updates)
+boston <- fredr(series_id = "ATNHPIUS14454Q") %>% 
+  select(date, Boston = value)
 
-tail(house_index)
+ny_nj <- fredr(series_id = "ATNHPIUS35614Q") %>% 
+  select(date, NY.NJ = value)
 
-write.csv(house_index, "all_house_price_index .csv")
+dallas <- fredr(series_id = "ATNHPIUS19124Q") %>% 
+  select(date, Dallas = value)
+
+philadelphia <- fredr(series_id = "ATNHPIUS37964Q") %>% 
+  select(date, Philadelphia = value)
+
+kansas_city <- fredr(series_id = "ATNHPIUS28140Q") %>% 
+  select(date, KansasCity = value)
+
+columbus <- fredr(series_id = "ATNHPIUS18140Q") %>% 
+  select(date, Columbus = value)
+
+pittsburgh <- fredr(series_id = "ATNHPIUS38300Q") %>% 
+  select(date, Pittsburgh = value)
+
+house_index <- list(
+  san_jose,
+  seattle,
+  san_francisco,
+  austin,
+  boston,
+  ny_nj,
+  dallas,
+  philadelphia,
+  kansas_city,
+  columbus,
+  pittsburgh
+) %>% 
+  reduce(full_join, by = "date")
 
 # Convert 'date' column to Date format if it's not already
 house_index$date <- as.Date(house_index$date)
@@ -35,6 +63,8 @@ house_index$date <- as.Date(house_index$date)
 sapply(house_index, class)
 head(house_index)
 tail(house_index)
+
+house_index <- house_index[-202,]
 
 # house_index[ 198, ]
 
@@ -65,7 +95,7 @@ house_index_long$city <- factor(house_index_long$city, levels = latest_prices[or
 p <- house_index_long %>% 
   mutate(is_pittsburgh = city == "Pittsburgh") %>% 
   ggplot(aes(x = date, y = price, color = city,
-                                      size = is_pittsburgh)) +
+             size = is_pittsburgh)) +
   geom_line() +
   scale_size_manual(breaks = c(FALSE, TRUE),
                     values = c(0.3, 1),
@@ -86,7 +116,7 @@ p <- house_index_long %>%
     axis.text = element_text(size = 14, face = "bold"),
     panel.grid.major = element_line())
 
-ggplotly(p)
+p
 
 ggsave("/Users/takayukitamura/Documents/R_Computing/figures/histrical_house_prices_major_cities.png", width = 6, height = 5)
 
@@ -112,7 +142,7 @@ ggsave("/Users/takayukitamura/Documents/R_Computing/figures/histrical_house_pric
 us_cpi_raw <- read.csv("/Users/takayukitamura/Documents/R_Computing/all_house_price_index/cpi_aucsl.csv") %>% 
   rename_all(tolower) %>% 
   mutate("cpi_index" = (cpiaucsl/78)*100) 
-  
+
 us_cpi_raw$date <- as.Date(us_cpi_raw$date, 
                            format = "%Y-%m-%d")  
 
@@ -143,22 +173,4 @@ cpi_house_index %>%
     legend.background = element_blank(),
     legend.key = element_blank()
   )
-
-ggsave("/Users/takayukitamura/Documents/R_Computing/figures/inflation vs home price.png", width = 6, height = 4)
-
-str(us_cpi_raw)
-us_cpi_raw[397,]
-cpi_house_index[1,]
-cpi_house_index[2,]
-
-cpi_house_index[391,]
-cpi_house_index[392,]
-
-(average_inflation <- 394/67.1)
-(average_home_price_appreciation <-658/59.9 )
-(10.98497-1)
-
-67.1*(1.033)^50
-
-str(cpi_house_index)
 
