@@ -57,7 +57,8 @@ house_index <- list(
   columbus,
   pittsburgh
 ) %>% 
-  reduce(full_join, by = "date")
+  reduce(full_join, by = "date") %>% 
+  drop_na()
 
 # Convert 'date' column to Date format if it's not already
 house_index$date <- as.Date(house_index$date)
@@ -140,39 +141,4 @@ us_house_price %>%
   )
 
 ggsave("/Users/takayukitamura/Documents/R_Computing/figures/histrical_house_prices.png", width = 6, height = 4)
-
-us_cpi_raw <- read.csv("/Users/takayukitamura/Documents/R_Computing/all_house_price_index/cpi_aucsl.csv") %>% 
-  rename_all(tolower) %>% 
-  mutate("cpi_index" = (cpiaucsl/78)*100) 
-
-us_cpi_raw$date <- as.Date(us_cpi_raw$date, 
-                           format = "%Y-%m-%d")  
-
-
-us_cpi_raw %>% 
-  ggplot(aes(x=date, y = cpi_index)) + 
-  geom_line()
-
-cpi_house_index <- merge(us_cpi_raw, us_house_price, by = "date") %>% 
-  select(date, cpi_index, US) %>% 
-  rename("home_price_average" = US) %>% 
-  pivot_longer(cols = -date, names_to = "inflation", 
-               values_to = "index")
-
-
-cpi_house_index %>% 
-  ggplot(aes(x = date, y = index, color = inflation)) +
-  geom_line()+
-  labs(title = "Historical Inflation and US Average House Price Index",
-       subtitle = "(1980-01-01 = 100)",
-       caption = "Source = FRED(Federal Reserve Bank of St.Louis)", 
-       x = NULL,
-       y = "inflation & average house price index") +
-  theme(
-    legend.title = element_blank(),
-    plot.title.position = "plot",
-    plot.caption = element_markdown(color = "grey", size = 7),
-    legend.background = element_blank(),
-    legend.key = element_blank()
-  )
 
