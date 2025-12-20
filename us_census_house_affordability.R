@@ -5,11 +5,13 @@ library(ggtext)
 library(scales)
 library(patchwork)
 
-census <- read_csv("/Users/takayukitamura/Documents/R_Computing/all_house_price_index/census_2023.csv") %>% 
+census <- read_csv("/Users/takayukitamura/Documents/R_Computing/house_price_index/census_2023.csv") %>% 
   rename(county = "Fact", population_2023 = "Population estimates, July 1, 2023, (V2023)", population_2010 = "Population, Census, April 1, 2010",
          median_house_value =  "Median value of owner-occupied housing units, 2019-2023", median_income = "Median households income (in 2023 dollars), 2019-2023",
          per_capita_income_2023 = "Per capita income in past 12 months (in 2023 dollars), 2019-2023") %>% 
   select(county, median_income, median_house_value)
+
+read_csv("/Users/takayukitamura/Documents/R_Computing/house_price_index/census_2023.csv")
 
 # Update the dataset with 'is_pittsburgh' flag
 census <- census %>%
@@ -31,6 +33,7 @@ a <- census %>%
        caption = "US Census") +
   theme_classic() +
   theme(
+    axis.text.y = element_text(size = 7),
     panel.grid.major.x = element_line()
   )
 
@@ -47,6 +50,7 @@ b <- census %>%
        caption = "US Census") +
   theme_classic() +
   theme(
+    axis.text.y = element_text(size = 7),
     panel.grid.major.x = element_line()
   )
 
@@ -61,6 +65,7 @@ c <- census %>%
        caption = "US Census") +
   theme_classic() +
   theme(
+    axis.text.y = element_text(size = 7),
     panel.grid.major.x = element_line()
   )
 
